@@ -1,0 +1,151 @@
+# The case list.
+#
+# GENERATED FILE. Do not hand-edit: regenerate with
+#
+#     julia --project=. scripts/fetch_benchmark4.jl
+#
+# ############################################################################
+# THE 51 CASES ARE PRESENT AND PROGRAMMATICALLY VERIFIED.
+# ############################################################################
+#
+# SOURCE  (fetched 2026-08-12, and re-fetchable -- this is provenance, not memory)
+#
+#   Set:       the enzyme category of the Protein-Protein Docking Benchmark,
+#              version 4.0 ("BM4.0"), Table SI.
+#   Citation:  Hwang, H., Vreven, T., Janin, J. & Weng, Z. "Protein-protein
+#              docking benchmark version 4.0." Proteins: Structure, Function,
+#              and Bioinformatics 78(15):3111-3114 (2010).
+#   Canonical: https://zlab.umassmed.edu/benchmark/
+#   Fetched:   https://zlab.wenglab.org/benchmark/benchmark4.html
+#   sha256:    f31320e885217cb6a350185f5a66adbd9ba3033ee609c669ddae1da22c07275c
+#
+#   The canonical address 302-redirects to the second: the lab moved host from
+#   zlab.umassmed.edu to zlab.wenglab.org. Both are recorded so a future reader
+#   can tell a move from a takedown. The page identifies itself as
+#   "Supplementary Information for Hwang, H, Vreven, T, Janin, J and Weng, Z.,
+#   Protein-Protein Docking Benchmark Version 4.0., Proteins., 2010 Nov
+#   15;78(15):3111-4." -- i.e. it IS the supplementary table of the paper this
+#   project already cited, and it agrees with reference [19] of the 2016 FMFT
+#   preprint and reference 25 of the 2017 ClusPro protocol to the issue number.
+#
+# WHY 52 ROWS FOR "51 PAIRS"
+#
+#   BM4.0 Table SI has 52 rows of category `E` spanning 51 DISTINCT PDB
+#   entries: 1OYV appears twice, as 1OYV_A:I and 1OYV_B:I, two different
+#   receptor chains of one deposition. The FMFT preprint's "51 enzyme-inhibitor
+#   pairs from the established Protein Docking Benchmark [19]"
+#   (Padhorny et al., 2016, https://doi.org/10.1073/pnas.1603929113, preprint p.4) is therefore the enzyme category counted by
+#   PDB entry, and no other reading of the table yields exactly 51. That
+#   arithmetic is the evidence; FMFT itself does not enumerate the cases (its
+#   Table S1 is absent from the arXiv PDF), so the identity of the set is
+#   [DERIVED] from a count, while every identifier below is [MEASURED] off the
+#   authors' own table.
+#
+#   The category label is BM4.0's, quoted from its footnote (a) verbatim:
+#   "E = Enzyme/Inhibitor or Enzyme/Substrate". So `enzyme_inhibitor` in the
+#   category column is BM4.0's coarse label, NOT a claim that every case is
+#   strictly an inhibitor complex -- BM5.5 later split these same cases into
+#   EI (39), ES (8) and ER (4), with 1N8O dropped. Quote the set as "the
+#   enzyme category of BM4.0", which is what FMFT measured against PIPER.
+#
+# TYPE IS NOT DIFFICULTY -- THE AXIS THAT MUST NOT BE COLLAPSED
+#
+#   BM4.0 classifies on TWO INDEPENDENT AXES and the table carries them in
+#   different places: biological TYPE is the `Cat.` column (E / A / O / AB),
+#   docking DIFFICULTY is a section heading (Rigid-body / Medium / Difficult).
+#   The 51 are defined by TYPE ONLY. Their difficulty spread is
+#   41 rigid-body, 6 medium, 5 difficult, so restricting to the
+#   rigid-body subset would drop 11 cases and produce a hit rate that looks
+#   comparable to the published one and is not. The `difficulty` column is here
+#   so that split stays available and explicit rather than accidental.
+#
+# VERIFICATION PERFORMED
+#
+#   1. The page parses to exactly 176 case rows -- BM4.0's published size --
+#      and the script fails rather than writing a file if it does not.
+#   2. Category E yields exactly 52 rows over 51 unique entries; both are
+#      asserted.
+#   3. Every identifier below -- bound complex and both unbound components --
+#      was resolved against files.rcsb.org, and the `resolution` column is read
+#      from the deposited header's REMARK 2 rather than supplied by hand.
+#
+# COLUMNS
+#   case                 identifier used in output and file names; equals
+#                        `complex` except where one entry contributes two cases
+#                        (1OYV_A, 1OYV_B), which is the 52-vs-51 arithmetic
+#   complex              PDB id of the bound complex (the answer)
+#   rec_chains           receptor chains in the bound complex
+#   lig_chains           ligand chains in the bound complex
+#   rec_unbound          PDB id of the separately-solved receptor
+#   rec_unbound_chains   its chains; `.` means the blank chain id of an
+#                        old-style single-chain deposition, NOT "unknown"
+#   lig_unbound          PDB id of the separately-solved ligand
+#   lig_unbound_chains   its chains, same convention
+#   category             enzyme_inhibitor | smoke
+#   difficulty           rigid_body | medium | difficult  (BM4.0's second axis)
+#   resolution           Angstroms from REMARK 2 of the bound complex, or NMR
+#   note                 protein names from the table, plus BM4.0's own flags
+#
+# STRUCTURES ARE FETCHED, NOT COMMITTED
+#
+#   bash scripts/fetch_structures.sh --all
+#
+#   data/structures/ is gitignored: third-party primary data with a canonical
+#   source and a stable URL, so the repository carries provenance and digests,
+#   not bytes. A case whose file is missing is REPORTED missing by
+#   bench/benchmark51.jl, never skipped -- a batch that quietly docks 3 of 51
+#   and prints a hit rate is worse than one that fails.
+case	complex	rec_chains	lig_chains	rec_unbound	rec_unbound_chains	lig_unbound	lig_unbound_chains	category	difficulty	resolution	note
+1ACB	1ACB	E	I	2CGA	B	1EGL	.	enzyme_inhibitor	medium	2.00	Chymotrypsin (E) + Eglin C (I)
+1AVX	1AVX	A	B	1QQU	A	1BA7	B	enzyme_inhibitor	rigid_body	1.90	Porcine trypsin (A) + Soybean trypsin inhibitor (B)
+1AY7	1AY7	A	B	1RGH	B	1A19	B	enzyme_inhibitor	rigid_body	1.70	RNase Sa (A) + Barstar (B)
+1BVN	1BVN	P	T	1PIG	.	1HOE	.	enzyme_inhibitor	rigid_body	2.50	a-amylase (P) + Tendamistat (T)
+1CGI	1CGI	E	I	2CGA	B	1HPT	.	enzyme_inhibitor	rigid_body	2.30	Bovine chymotrypsinogen (E) + PSTI (I)
+1CLV	1CLV	A	I	1JAE	A	1QFD	A	enzyme_inhibitor	rigid_body	2.00	a-amylase (A) + a-amylase inhibitor (I); unbound ligand model 1
+1D6R	1D6R	A	I	2TGT	.	1K9B	A	enzyme_inhibitor	rigid_body	2.30	Bovine trypsin (A) + Bowman-Birk inhibitor (I)
+1DFJ	1DFJ	E	I	9RSA	B	2BNH	.	enzyme_inhibitor	rigid_body	2.50	Ribonuclease A (E) + Rnase inhibitor (I)
+1E6E	1E6E	A	B	1E1N	A	1CJE	D	enzyme_inhibitor	rigid_body	2.30	Adrenoxin reductase (A) + Adrenoxin (B)
+1EAW	1EAW	A	B	1EAX	A	9PTI	.	enzyme_inhibitor	rigid_body	2.93	Matriptase (A) + BPTI (B)
+1EWY	1EWY	A	C	1GJR	A	1CZP	A	enzyme_inhibitor	rigid_body	2.38	Ferredoxin reductase (A) + Ferredoxin (C)
+1EZU	1EZU	C	AB	1TRM	A	1ECZ	AB	enzyme_inhibitor	rigid_body	2.40	D102N Trypsin (C) + Ecotin (AB); SCOP-redundant per BM4.0 footnote
+1F34	1F34	A	B	4PEP	.	1F32	A	enzyme_inhibitor	rigid_body	2.45	Porcine pepsin (A) + Ascaris inhibitor 3 (B)
+1F6M	1F6M	A	C	1CL0	A	2TIR	A	enzyme_inhibitor	difficult	2.95	Thioredoxin reductse (A) + Thioredoxin 1 (C)
+1FLE	1FLE	E	I	9EST	A	2REL	A	enzyme_inhibitor	rigid_body	1.90	Elastase (E) + Elafin (I); unbound ligand model 4
+1FQ1	1FQ1	A	B	1B39	A	1FPZ	F	enzyme_inhibitor	difficult	3.00	CDK2 kinase (A) + CDK inhibitor 3 (B)
+1GL1	1GL1	A	I	1K2I	1	1PMC	A	enzyme_inhibitor	rigid_body	2.10	a-chymotrypsin (A) + Protease inhibitor LCMI II (I); unbound ligand model 6
+1GXD	1GXD	A	C	1CK7	A	1BR9	A	enzyme_inhibitor	rigid_body	3.10	proMMP2 type IV collagenase (A) + Metalloproteinase inhibitor 2 (C)
+1HIA	1HIA	AB	I	2PKA	XY	1BX8	.	enzyme_inhibitor	rigid_body	2.40	Kallikrein (AB) + Hirustatin (I)
+1IJK	1IJK	A	BC	1AUQ	.	1FVU	AB	enzyme_inhibitor	medium	2.60	Von Willebrand Factor dom. A1 (A) + Botrocetin (BC)
+1JIW	1JIW	P	I	1AKL	A	2RN4	A	enzyme_inhibitor	medium	1.74	Alkaline metalloproteinase (P) + Proteinase inhibitor (I); unbound ligand model 1
+1JTG	1JTG	B	A	3GMU	B	1ZG4	A	enzyme_inhibitor	rigid_body	1.73	Beta-lactamase inhibitor protein (B) + Beta-lactamase TEM-1 (A)
+1KKL	1KKL	ABC	H	1JB1	ABC	2HPR	.	enzyme_inhibitor	medium	2.80	HPr kinase C-ter domain (ABC) + HPr (H)
+1M10	1M10	A	B	1AUQ	.	1M0Z	B	enzyme_inhibitor	medium	3.10	Von willebrand factor dom. A1 (A) + Glycoprotein IB-a (B)
+1MAH	1MAH	A	F	1J06	B	1FSC	.	enzyme_inhibitor	rigid_body	3.20	Acetylcholinesterase (A) + Fasciculin (F)
+1N8O	1N8O	ABC	E	8GCH	A	1IFG	A	enzyme_inhibitor	rigid_body	2.00	Chymotrypsin (ABC) + Ecotin (E); SCOP-redundant per BM4.0 footnote
+1NW9	1NW9	B	A	1JXQ	A	2OPY	A	enzyme_inhibitor	medium	2.40	Capase-9 (B) + BIR3-XPIA (A)
+1OC0	1OC0	A	B	1B3K	A	2JQ8	A	enzyme_inhibitor	rigid_body	2.28	Plasminogen activator inhibitor-1 (A) + Vitronectin Somatomedin B domain (B); unbound ligand model 4
+1OPH	1OPH	A	B	1QLP	A	1UTQ	A	enzyme_inhibitor	rigid_body	2.30	a-1-antitrypsin (A) + Trypsinogen (B)
+1OYV_A	1OYV	A	I	1SCD	A	1PJU	A	enzyme_inhibitor	rigid_body	2.50	Subtilisin Carlsberg (A) + Two-headed tomato inhibitor-II (I)
+1OYV_B	1OYV	B	I	1SCD	A	1PJU	A	enzyme_inhibitor	rigid_body	2.50	Subtilisin Carlsberg (B) + Two-headed tomato inhibitor-II (I)
+1PPE	1PPE	E	I	1BTP	.	1LU0	A	enzyme_inhibitor	rigid_body	2.00	Bovine trypsin (E) + CMTI-1 squash inhibitor (I)
+1PXV	1PXV	A	C	1X9Y	A	1NYC	A	enzyme_inhibitor	difficult	1.80	Cystein protease (A) + Cystein protease inhibitor (C)
+1R0R	1R0R	E	I	1SCN	E	2GKR	I	enzyme_inhibitor	rigid_body	1.10	Subtilisin carlsberg (E) + OMTKY (I)
+1TMQ	1TMQ	A	B	1JAE	.	1B1U	A	enzyme_inhibitor	rigid_body	2.50	alpha-amylase (A) + RAGI inhibitor (B)
+1UDI	1UDI	E	I	1UDH	.	2UGI	B	enzyme_inhibitor	rigid_body	2.70	Uracyl-DNA glycosylase (E) + Glycosylase inhibitor (I)
+1YVB	1YVB	A	I	2GHU	A	1CEW	I	enzyme_inhibitor	rigid_body	2.70	Falcipain 2 (A) + Cystatin (I)
+1ZLI	1ZLI	A	B	1KWM	A	2JTO	A	enzyme_inhibitor	difficult	2.09	Carboxypeptidase B (A) + Tick carboxypeptidase inhibitor (B); unbound ligand model 6
+2ABZ	2ABZ	B	E	3I1U	A	1ZFI	A	enzyme_inhibitor	rigid_body	2.16	Carboxypeptidase A1 (B) + Leech carboxypeptidase inhibitor (E); unbound ligand model 1
+2B42	2B42	B	A	2DCY	A	1T6E	X	enzyme_inhibitor	rigid_body	2.50	Xylanase (B) + Xylanase inhibitor (A)
+2J0T	2J0T	A	D	966C	A	1D2B	A	enzyme_inhibitor	rigid_body	2.54	MMP1 Intersitial collagenase (A) + Metalloproteinase inhibitor 1 (D); unbound ligand model 20
+2MTA	2MTA	HL	A	2BBK	JM	2RAC	A	enzyme_inhibitor	rigid_body	2.40	Methylamine dehydrogenase (HL) + Amicyanin (A)
+2O3B	2O3B	A	B	1ZM8	A	1J57	A	enzyme_inhibitor	difficult	2.30	NucA nuclease (A) + NuiA nuclease inhibitor (B)
+2O8V	2O8V	A	B	1SUR	A	2TRX	A	enzyme_inhibitor	rigid_body	3.00	PAPS reductase (A) + Thioredoxin (B)
+2OUL	2OUL	A	B	3BPF	A	2NNR	A	enzyme_inhibitor	rigid_body	2.20	Falcipain 2 (A) + Chagasin (B)
+2PCC	2PCC	A	B	1CCP	.	1YCC	.	enzyme_inhibitor	rigid_body	2.30	Cyt C peroxidase (A) + Cytochrome C (B)
+2SIC	2SIC	E	I	1SUP	.	3SSI	.	enzyme_inhibitor	rigid_body	1.80	Subtilisin (E) + Streptomyces subtilisin inhibitor (I)
+2SNI	2SNI	E	I	1UBN	A	2CI2	I	enzyme_inhibitor	rigid_body	2.10	Subtilisin (E) + Chymotrypsin inhibitor 2 (I)
+2UUY	2UUY	A	B	1HJ9	A	2UUX	A	enzyme_inhibitor	rigid_body	1.15	Trypsin (A) + Tryptase inhibitor from tick (B)
+3SGQ	3SGQ	E	I	2QA9	E	2OVO	A	enzyme_inhibitor	rigid_body	1.80	Streptogrisin B (E) + Ovomucoid inhibitor third domain (I)
+4CPA	4CPA	A	I	8CPA	A	1H20	A	enzyme_inhibitor	rigid_body	2.50	Carboxypeptidase A (A) + Potato carboxypeptidase inhibitor (I); unbound ligand model 9
+7CEI	7CEI	A	B	1UNK	D	1M08	B	enzyme_inhibitor	rigid_body	2.30	Colicin E7 nuclease (A) + Im7 immunity protein (B)
+1GGR	1GGR	A	B	1F3G	A	1HDN	A	smoke	-	NMR	E2A-HPr, the smoke-test case. NOT a BM4.0 case and NOT an enzyme-inhibitor pair.

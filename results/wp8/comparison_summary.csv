@@ -1,0 +1,15 @@
+# WP8 external comparison -- one row per case, derived from
+# results/wp8/<case>/comparison.json (including derived aggregates and flags).
+# Metric: ligand C-alpha displacement in the receptor-fixed frame, no
+# re-superposition. floor = 1.6 A (estimated);
+# near-native = centre within 10.0 A of the native, both sides.
+# top_centre_to_centre: leading balanced ClusPro model to nearest JuPIPER centre.
+# band_top_centre applies the A/B/C bands (cutoffs 2.5 and 5 A)
+# to top_centre_to_centre ONLY; they are a reading aid, not the criterion.
+# The pre-registered criterion is same_rank_band AND within_floor.
+case,job,nrot,search_floor_ca,their_clusters_balanced,our_clusters,their_top_lrmsd_native,our_top_lrmsd_native,their_nn_cluster_rank,our_nn_cluster_rank,same_rank_band,top_centre_to_centre,top_centre_nearest_our_centre_rank,pose_within_2A,top_centre_to_our_top1000,top_centre_our_rank_of_that_pose,within_floor,joint_criterion,band_top_centre,balanced_to_top1000_min,balanced_to_top1000_med,balanced_to_top1000_max,balanced_within_1p6,balanced_within_2p5,our_centres_to_server_min,our_centres_to_server_med,our_centres_to_server_max,their_best_any_set_lrmsd_native,their_best_any_set,our_best_pose_lrmsd_native,rec_fit_max
+1ACB,1468320,69960,0.6226,20,23,5.75,7.06,1,1,True,4.58,1,True,1.93,319,False,False,B,1.13,3.57,15.83,6,10,1.14,6.56,25.13,2.9,vdw_elec,0.62,8.893219172762357e-15
+1AVX,1468525,69960,0.9903,17,30,2.78,28.46,1,7,False,5.6,7,True,1.85,20,False,False,C,1.85,8.68,21.6,0,5,2.45,13.15,42.33,2.78,balanced,0.99,2.7819645673520674e-14
+1AY7,1468526,69960,0.7161,23,30,42.76,36.83,,26,False,6.68,7,False,5.76,338,False,False,C,1.37,9.45,16.56,1,1,0.99,14.82,21.73,1.58,vdw_elec,0.95,7.134856711248196e-15
+1BVN,1468528,69960,0.8235,14,12,4.85,6.82,1,1,True,3.77,1,True,1.98,106,False,False,B,1.29,4.28,37.77,1,5,1.57,4.51,31.7,4.05,vdw_elec,0.98,4.022950851453714e-14
+1CGI,1468529,69960,0.9463,11,11,5.56,1.47,1,1,True,6.2,1,True,1.98,437,False,False,C,1.79,5.1,9.77,0,4,2.6,5.1,36.61,2.22,vdw_elec,0.95,1.971806713498527e-14

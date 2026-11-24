@@ -1,0 +1,15 @@
+cff-version: 1.2.0
+message: "Please cite this software when using JuPIPER."
+type: software
+title: JuPIPER
+version: 0.1.0
+date-released: 2026-11-24
+license: MIT
+repository-code: "https://github.com"
+authors:
+  - family-names: Afanasyev
+    given-names: Ilya
+    affiliation: Innopolis University
+    email: i.afanasyev@innopolis.ru
+# Zenodo version DOI: uncomment and fill in after the release is archived.
+# doi: "10.5281/zenodo.<record-id>"

@@ -1,0 +1,72 @@
+\documentclass[10pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern,graphicx,amsmath,booktabs,longtable}
+\usepackage[a4paper,margin=24mm]{geometry}
+\usepackage[hidelinks]{hyperref}
+\graphicspath{{build/}}
+\input{numbers}
+\renewcommand{\thetable}{S\arabic{table}}
+\renewcommand{\thefigure}{S\arabic{figure}}
+\begin{document}
+\begin{center}
+{\LARGE Supplementary Information for JuPIPER\par}
+\medskip
+{\large Editable scoring for FFT-based protein--protein docking on CPUs and GPUs\par}
+\medskip
+Ilya Afanasyev, Innopolis University
+\end{center}
+\section{Correlation on a translation grid}
+The receptor and ligand are represented on a Cartesian grid. Let $R_p$ and
+$L_p$ be the fields for score component $p$, including its weight on the
+receptor side. The discrete correlation gives the energy at every translation:
+\[
+E(\mathbf{t})=\sum_p\sum_{\mathbf{x}}R_p(\mathbf{x})L_p(\mathbf{x}+\mathbf{t})
+=\mathcal F^{-1}\!\left(\sum_p\overline{\mathcal F(R_p)}\mathcal F(L_p)\right)(\mathbf{t}).
+\]
+For $m$ fields, each orientation requires $m$ forward transforms and one inverse
+transform. Receptor spectra are reusable across orientations. Linearity of the
+inverse transform allows the products for all fields to be summed in Fourier
+space. The index of the minimum of the resulting grid selects a translation.
+
+\begin{figure}[!ht]
+\renewcommand{\thefigure}{S\arabic{figure}(b)}
+\centering\includegraphics[width=.91\linewidth]{figS1_dispatch.pdf}
+\caption{CPU and GPU implementations of the correlation. The numerical
+tests compare full synthetic energy fields and the translations selected on 1GGR.}
+\end{figure}
+
+\begin{figure}[!ht]
+\centering\includegraphics[width=.60\linewidth]{fig3_stages_compact.pdf}
+\caption{Synthetic per-orientation stage timings, one virtual CPU core and
+one RTX~4090, Float32, $P=6$, batch size one. Each of the five separately
+timed stages is divided by their sum. The translation scan follows the
+correlation. Forward FFTs lead on the CPU at all three sizes. On the GPU,
+voxelisation leads at $64^3$ (40.8\%) and forward transforms lead at $96^3$
+and $128^3$ (38.0\% and 40.2\%).}
+\end{figure}
+
+\section{Branch-and-bound test on Hopf fibres}
+A branch-and-bound experiment grouped orientations by Hopf fibre. Its lower
+bound retired zero of 200 fibres at the tested thresholds and increased the
+runtime by a factor of 1.34.
+
+\clearpage
+\section{Bound redocking by case}
+The benchmark category contains \campCases{} cases. Two use different chains
+of 1OYV. The control 1GGR is outside the category. A hit is a pose within
+10\,\AA{} ligand C$\alpha$ RMSD of the deposited placement. A dash denotes
+no qualifying pose or cluster. First-hit rank covers the full search, while
+the hit count uses the first 1,000 poses. Times cover the orientation loop
+on the first machine. Of the \campOk{} completed searches, \campHitAll{} had
+a hit somewhere in the ranking. For 1D6R the stored first-hit rank is zero.
+
+\setcounter{table}{1} % Preserve the benchmark table's identifier, S2.
+\small
+\begin{longtable}{lrrrr}
+\caption{First campaign, including the failed case.}\\
+\toprule Case & First-hit rank & Hits in top 1,000 & First near-native cluster & Search (s)\\\midrule\endfirsthead
+\toprule Case & First-hit rank & Hits in top 1,000 & First near-native cluster & Search (s)\\\midrule\endhead
+\campTableBody
+\bottomrule
+\end{longtable}
+\end{document}

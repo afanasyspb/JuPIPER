@@ -1,0 +1,74 @@
+# ClusPro scoring-profile weighting coefficients, 2017 protocol, seven modes.
+#
+# PROVENANCE
+#   Table 1 ("Weighting coefficients of PIPER energy terms in various docking
+#   modes") of:
+#     Kozakov D., Hall D.R., Xia B., Porter K.A., Padhorny D., Yueh C.,
+#     Beglov D., Vajda S.
+#     "The ClusPro web server for protein-protein docking"
+#     Nature Protocols 12(2):255-278, 2017.
+#   Read directly from a PMC author manuscript. Table 1 is on PDF p.4 of that copy, which
+#   is the page the surrounding prose cited below also comes from.
+#
+# THE ENERGY FUNCTION THESE COEFFICIENTS BELONG TO IS **NOT** THE ONE JuPIPER
+# IMPLEMENTS. Read this before using a single number in this file.
+#
+#   2017 (p.4):  E = w1*E_rep + w2*E_attr + w3*E_elec + w4*E_DARS
+#   2006 (PIPER preprint, PDF p.9, the form JuPIPER implements):
+#                E = E_shape + w2*E_elec + w3*E_pair
+#                with E_shape = E_attr + w1*E_rep
+#
+# So the 2017 form frees a coefficient the 2006 form pins at 1, and its w1..w4 are NOT the
+# 2006 w1..w3 renumbered. Worse, 2017 p.4 states that E_rep and E_attr, "while defined on
+# the grid, are scaled to the van der Waals energy, and hence w1 < 1.0 and w2 < 1.0 yield
+# 'softening'". JuPIPER's shape grids are COUNTS OF ATOMS (PIPER preprint p.10). A weight
+# whose meaning is "fraction of a van der Waals energy" has no interpretation applied to a
+# count.
+#
+# TRANSCRIPTION STATUS: transcribed by hand from the PDF table.
+#   Checked: six independent constraints stated in the paper's own prose on the
+#   same page, all of which hold --
+#     (a) w3 = 600.0 is named for the balanced set;
+#     (b) w4 = 1.0 is named as the "neutral" choice;
+#     (c) electrostatic-favored "the weight of the electrostatics is doubled"
+#         -> 600 -> 1200;
+#     (d) hydrophobic-favored "doubles the weight of the desolvation term"
+#         -> 1.0 -> 2.0;
+#     (e) van der Waals + electrostatics: "the pairwise potential E_pair is not
+#         used" -> w4 = 0.0;
+#     (f) Others: "we reduce the coefficients of E_attr and E_elec, and use
+#         three different values for the coefficient of E_DARS"
+#         -> |w2| 0.40 -> 0.30/0.20, w3 600 -> 300, w4 1.25/0.50/0.0.
+#   Twenty-eight numbers, six constraints, all satisfied.
+#   NOT yet checked against an independent electronic source, and there is no
+#   second copy in this repository to check against. Treat as "high confidence,
+#   unverified", the same status as data/potentials/dars_acp18.tsv.
+#
+# STATUS OF THESE NUMBERS INSIDE JuPIPER: [ASSUMED], not [MEASURED] and not even
+# [CITED-AND-APPLICABLE]. They are published values for a published energy function that
+# is not ours. Converting them to JuPIPER's three-weight form (see `assumed_piper_weights`
+# in src/scoring.jl) is exact arithmetic resting on an assumption that is known to be
+# false in one respect and unquantified in the rest: that our count-valued E_rep/E_attr
+# grids carry the same relative normalisation as the reference's vdW-scaled ones.
+#
+# UNITS AND ONE COUPLING WORTH KNOWING (2017 p.4, same page): w3 = 332 is named as the
+# coefficient that WOULD convert E_elec to kcal/mol under a plain Coulomb expression with
+# charges in electrons and distances in angstrom. 600 is used instead because "the
+# truncation and smoothing reduce the magnitude of E_elec".
+#
+# COLUMNS
+#   key      machine name, used by `cluspro_profile(:key)`
+#   w_rep    2017 w1, weight of E_rep
+#   w_attr   2017 w2, weight of E_attr (negative: E_attr is a positive quantity
+#            and the negative weight is what makes contact favourable)
+#   w_elec   2017 w3, weight of E_elec
+#   w_dars   2017 w4, weight of E_DARS
+#   label    the paper's own name for the mode
+key	w_rep	w_attr	w_elec	w_dars	label
+balanced	0.40	-0.40	600.0	1.0	Balanced
+electrostatic	0.40	-0.40	1200.0	1.0	Electrostatic-favored
+hydrophobic	0.40	-0.40	600.0	2.0	Hydrophobic-favored
+vdw_elec	0.40	-0.40	600.0	0.0	van der Waals + electrostatics
+others1	0.30	-0.30	300.0	1.25	Others, set 1
+others2	0.50	-0.20	300.0	0.50	Others, set 2
+others3	0.50	-0.20	300.0	0.0	Others, set 3

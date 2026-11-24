@@ -1,0 +1,363 @@
+# ACP 18-type atom classification: (residue name, atom name) -> type label.
+#
+# =============================================================================
+# PROVENANCE -- READ THIS BEFORE USING OR CITING THE TABLE
+# =============================================================================
+#
+# STATUS: reconstructed per-atom assignments.
+#
+#   Kozakov et al. (Proteins 65:392–406, 2006) adopted the 18 ACP atom types
+#   from Zhang et al. (J Mol Biol 267:707–726, 1997). They distinguish the
+#   four backbone atom types and describe the principal hydrophobic side-chain
+#   categories. Table I supplies the labels used in the reconstruction below.
+#   https://doi.org/10.1002/prot.21117
+#
+# WHAT IT IS DERIVED FROM
+#   (a) The 18 type labels themselves, which are exemplar atoms and therefore
+#       self-documenting: `KNz` is lysine N-zeta, `LCd` is leucine C-delta,
+#       `GCa` is glycine C-alpha, and so on. The label set is transcribed --
+#       it comes from Table I of the PIPER preprint via
+#       `data/potentials/dars_acp18.tsv`, and the ordering here matches that
+#       file exactly, which is a hard requirement (see CHECKED below).
+#   (b) Standard organic and protein chemistry: element, hybridisation, formal
+#       charge state at pH 7, hydrogen-bonding role, aromaticity.
+#   (c) Two explicit constraints from Kozakov et al. --
+#       backbone N/CA/C/O are separate types, and the bulk of hydrophobic
+#       side-chain carbon sits in FCz and LCd.
+#   (d) The internal structure of the DARS matrix itself, used as a consistency
+#       check rather than as a source. See CHECKED item 5.
+#
+#   The classification rules actually applied are stated in full below, so that
+#   a reviewer can audit the *rule* rather than re-deriving 167 decisions.
+#
+# =============================================================================
+# CLASSIFICATION RULES APPLIED
+# =============================================================================
+#
+#   R1  Backbone N, CA, C, O are their own types.        [preprint p.20, explicit]
+#   R2  Glycine CA -> GCa. Glycine's alpha carbon is a methylene, not a
+#       methine, and the type list carries a dedicated label for it.
+#   R3  C-beta -> Cb, for every residue that has one. The class is *named*
+#       C-beta; taking the name literally is what makes the rule auditable.
+#   R4  An sp2 carbon bonded to oxygen -- side-chain amide or carboxyl carbon
+#       (ASN CG, GLN CD, ASP CG, GLU CD) -> C, the same class as the backbone
+#       carbonyl carbon it is chemically identical to.
+#   R5  An amide carbonyl oxygen (ASN OD1, GLN OE1) -> O, likewise.
+#   R6  A carboxylate oxygen (ASP OD1/OD2, GLU OE1/OE2, and OXT) -> DOd.
+#   R7  An aromatic ring carbon -> FCz, except TYR CZ, which bears the hydroxyl
+#       and has its own label -> YCz.
+#   R8  An aliphatic carbon at gamma or beyond that is terminal or branched
+#       (a methyl, or the branch carbon of a beta-branched side chain) -> LCd.
+#       A mid-chain methylene at gamma or delta not adjacent to a formal charge
+#       -> Cb.  **This is the least certain rule in the file; see LIMITATIONS.**
+#   R9  A carbon belonging to the formally charged terminus of a LYS or ARG
+#       side chain (LYS CD, CE; ARG CD, CZ) -> KCd. The exemplar that names the
+#       class is lysine C-delta, so LYS CD is fixed by the label; CE, and ARG's
+#       CD and CZ, follow it by the same chemistry.
+#   R10 A formally charged sp3 amine nitrogen (LYS NZ) -> KNz.
+#   R11 The guanidinium nitrogens have two labels of their own: ARG NE -> RNe,
+#       ARG NH1/NH2 -> RNh.
+#   R12 A side-chain amide nitrogen (ASN ND2, GLN NE2) -> NNd.
+#   R13 An aromatic / imidazole nitrogen (HIS ND1, NE2; TRP NE1) -> HNe.
+#   R14 A hydroxyl oxygen (SER OG, THR OG1, TYR OH) -> SOg.
+#   R15 Sulfur, and its selenium isostere (CYS SG, MET SD, MSE SE) -> CSg.
+#
+# =============================================================================
+# CHECKED
+# =============================================================================
+#
+#   1. **The table has exactly 167 (residue, atom) rows over the 20 standard
+#      residues.** This is not a coincidence and it is the strongest available
+#      completeness check: the PIPER preprint states that "the existing
+#      pairwise interaction potentials can have up to 167 atom types"
+#      (PDF p.12), which is precisely the number of distinct heavy atoms in
+#      the 20 standard amino acids. A miscount in either direction would show
+#      up here. Verified by `test/test_pdb.jl`.
+#   2. Every one of the 18 labels is used at least once.
+#   3. The labels, and their order, agree exactly with the header of
+#      `data/potentials/dars_acp18.tsv`. Verified by `test/test_pdb.jl`; the
+#      two files must never drift, because the type index is what indexes the
+#      DARS eigenvector matrix.
+#   4. Each residue's atom set was checked against standard PDB v3 atom
+#      nomenclature, and every atom of every residue is present exactly once.
+#   5. **Direction check against the DARS matrix.** LCd-LCd is -1.98, the most
+#      attractive non-artefact entry in the matrix, and Cb-Cb is only -0.25.
+#      That is what a split into "terminal hydrophobic methyl" (buried, strong)
+#      versus "mid-chain methylene" (mixed exposure, weak) predicts, and it is
+#      the reason R8 puts terminal carbons in LCd rather than lumping all
+#      post-beta aliphatics together. Likewise KCd-KCd is +1.37 and KCd-KNz is
+#      +1.34, the most repulsive entries after KNz-KNz, which is what a
+#      "carbon attached to a formal charge" class should look like. These are
+#      consistency checks on a reconstruction, **not** independent evidence:
+#      a different assignment that produced the same signs would be equally
+#      consistent.
+#
+# =============================================================================
+# LIMITATIONS -- the specific places this is most likely to be wrong
+# =============================================================================
+#
+#   L1. **The mid-chain methylenes (rule R8) are the largest open ambiguity.**
+#       Eight atom types are affected -- PRO CG, PRO CD, LEU CG, ILE CG1,
+#       MET CG, GLN CG, GLU CG, LYS CG, ARG CG -- and each could plausibly sit
+#       in Cb (as here) or in LCd. They are roughly 6% of the heavy atoms of a
+#       typical protein. Nothing in the preprint discriminates.
+#   L2. The preprint's remark that "most hydrophobic side chain atoms are in
+#       the FCz and LCd categories" is satisfied here by type count
+#       (FCz 23 + LCd 8 = 31 against Cb's 28) but **not** by atom count in a
+#       typical protein, where Cb is the larger class. If that sentence is read
+#       as a constraint rather than as loose description, it argues for moving
+#       some of L1's atoms into LCd. It was not treated as a constraint,
+#       because it is a descriptive aside in a paper that has already told the
+#       reader to look elsewhere for the definition.
+#   L3. HIS ring carbons are all FCz, and HIS is treated as neutral. An 18-type
+#       scheme has no label for an imidazole carbon flanked by two nitrogens
+#       (CE1), so it goes with the aromatics.
+#   L4. Positional context is deliberately absent. This is a pure
+#       (residue, atom) table, which is what makes it swappable against
+#       Zhang et al. without touching code. Two consequences: the N-terminal
+#       nitrogen is typed `N` although it is a charged amine, and the
+#       C-terminal backbone oxygen is typed `O` although it is half of a
+#       carboxylate whose other half (OXT) is typed `DOd`. Both are one atom
+#       per chain. `parametrize`'s `terminal_carboxylate` keyword promotes the
+#       second case if you want it; it is off by default, because layering an
+#       uncited refinement on an uncited reconstruction compounds rather than
+#       reduces the uncertainty.
+#   L5. MSE (selenomethionine) is included because it is the most common
+#       modified residue in the PDB and dropping it would silently delete a
+#       buried hydrophobic side chain. It is **not** part of the 167 and is not
+#       in Zhang et al.'s scheme at all; SE is assigned to CSg as sulfur's
+#       isostere. Any other modified residue is dropped by the reader and
+#       counted, never guessed at.
+#
+# =============================================================================
+# FORMAT
+# =============================================================================
+#
+#   Tab-separated: <residue name> <atom name> <ACP type label>.
+#   Comments start with `#`; blank lines ignored.
+#   A residue name of `*` matches any residue, and is consulted only when no
+#   exact (residue, atom) row exists. It exists for OXT, which every residue
+#   can carry and no residue carries in its own right.
+#   Names are PDB v3 nomenclature, uppercase, whitespace already stripped.
+#
+# =============================================================================
+
+# --- any residue -------------------------------------------------------------
+*	OXT	DOd
+
+# --- ALA ---------------------------------------------------------------------
+ALA	N	N
+ALA	CA	Ca
+ALA	C	C
+ALA	O	O
+ALA	CB	Cb
+
+# --- ARG ---------------------------------------------------------------------
+ARG	N	N
+ARG	CA	Ca
+ARG	C	C
+ARG	O	O
+ARG	CB	Cb
+ARG	CG	Cb
+ARG	CD	KCd
+ARG	NE	RNe
+ARG	CZ	KCd
+ARG	NH1	RNh
+ARG	NH2	RNh
+
+# --- ASN ---------------------------------------------------------------------
+ASN	N	N
+ASN	CA	Ca
+ASN	C	C
+ASN	O	O
+ASN	CB	Cb
+ASN	CG	C
+ASN	OD1	O
+ASN	ND2	NNd
+
+# --- ASP ---------------------------------------------------------------------
+ASP	N	N
+ASP	CA	Ca
+ASP	C	C
+ASP	O	O
+ASP	CB	Cb
+ASP	CG	C
+ASP	OD1	DOd
+ASP	OD2	DOd
+
+# --- CYS ---------------------------------------------------------------------
+CYS	N	N
+CYS	CA	Ca
+CYS	C	C
+CYS	O	O
+CYS	CB	Cb
+CYS	SG	CSg
+
+# --- GLN ---------------------------------------------------------------------
+GLN	N	N
+GLN	CA	Ca
+GLN	C	C
+GLN	O	O
+GLN	CB	Cb
+GLN	CG	Cb
+GLN	CD	C
+GLN	OE1	O
+GLN	NE2	NNd
+
+# --- GLU ---------------------------------------------------------------------
+GLU	N	N
+GLU	CA	Ca
+GLU	C	C
+GLU	O	O
+GLU	CB	Cb
+GLU	CG	Cb
+GLU	CD	C
+GLU	OE1	DOd
+GLU	OE2	DOd
+
+# --- GLY ---------------------------------------------------------------------
+GLY	N	N
+GLY	CA	GCa
+GLY	C	C
+GLY	O	O
+
+# --- HIS ---------------------------------------------------------------------
+HIS	N	N
+HIS	CA	Ca
+HIS	C	C
+HIS	O	O
+HIS	CB	Cb
+HIS	CG	FCz
+HIS	ND1	HNe
+HIS	CD2	FCz
+HIS	CE1	FCz
+HIS	NE2	HNe
+
+# --- ILE ---------------------------------------------------------------------
+ILE	N	N
+ILE	CA	Ca
+ILE	C	C
+ILE	O	O
+ILE	CB	Cb
+ILE	CG1	Cb
+ILE	CG2	LCd
+ILE	CD1	LCd
+
+# --- LEU ---------------------------------------------------------------------
+LEU	N	N
+LEU	CA	Ca
+LEU	C	C
+LEU	O	O
+LEU	CB	Cb
+LEU	CG	Cb
+LEU	CD1	LCd
+LEU	CD2	LCd
+
+# --- LYS ---------------------------------------------------------------------
+LYS	N	N
+LYS	CA	Ca
+LYS	C	C
+LYS	O	O
+LYS	CB	Cb
+LYS	CG	Cb
+LYS	CD	KCd
+LYS	CE	KCd
+LYS	NZ	KNz
+
+# --- MET ---------------------------------------------------------------------
+MET	N	N
+MET	CA	Ca
+MET	C	C
+MET	O	O
+MET	CB	Cb
+MET	CG	Cb
+MET	SD	CSg
+MET	CE	LCd
+
+# --- MSE (selenomethionine; a modified residue, NOT one of the 167) ----------
+MSE	N	N
+MSE	CA	Ca
+MSE	C	C
+MSE	O	O
+MSE	CB	Cb
+MSE	CG	Cb
+MSE	SE	CSg
+MSE	CE	LCd
+
+# --- PHE ---------------------------------------------------------------------
+PHE	N	N
+PHE	CA	Ca
+PHE	C	C
+PHE	O	O
+PHE	CB	Cb
+PHE	CG	FCz
+PHE	CD1	FCz
+PHE	CD2	FCz
+PHE	CE1	FCz
+PHE	CE2	FCz
+PHE	CZ	FCz
+
+# --- PRO ---------------------------------------------------------------------
+PRO	N	N
+PRO	CA	Ca
+PRO	C	C
+PRO	O	O
+PRO	CB	Cb
+PRO	CG	Cb
+PRO	CD	Cb
+
+# --- SER ---------------------------------------------------------------------
+SER	N	N
+SER	CA	Ca
+SER	C	C
+SER	O	O
+SER	CB	Cb
+SER	OG	SOg
+
+# --- THR ---------------------------------------------------------------------
+THR	N	N
+THR	CA	Ca
+THR	C	C
+THR	O	O
+THR	CB	Cb
+THR	OG1	SOg
+THR	CG2	LCd
+
+# --- TRP ---------------------------------------------------------------------
+TRP	N	N
+TRP	CA	Ca
+TRP	C	C
+TRP	O	O
+TRP	CB	Cb
+TRP	CG	FCz
+TRP	CD1	FCz
+TRP	CD2	FCz
+TRP	NE1	HNe
+TRP	CE2	FCz
+TRP	CE3	FCz
+TRP	CZ2	FCz
+TRP	CZ3	FCz
+TRP	CH2	FCz
+
+# --- TYR ---------------------------------------------------------------------
+TYR	N	N
+TYR	CA	Ca
+TYR	C	C
+TYR	O	O
+TYR	CB	Cb
+TYR	CG	FCz
+TYR	CD1	FCz
+TYR	CD2	FCz
+TYR	CE1	FCz
+TYR	CE2	FCz
+TYR	CZ	YCz
+TYR	OH	SOg
+
+# --- VAL ---------------------------------------------------------------------
+VAL	N	N
+VAL	CA	Ca
+VAL	C	C
+VAL	O	O
+VAL	CB	Cb
+VAL	CG1	LCd
+VAL	CG2	LCd

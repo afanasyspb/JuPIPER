@@ -1,0 +1,66 @@
+# Antibody CDR definitions -- the four numbering-scheme-relative loop ranges.
+#
+# PROVENANCE source http://www.bioinf.org.uk/abs/info.html "Antibody Information",
+#              Prof. Andrew C. R. Martin's group, UCL -- the same group that
+#              runs the abYsis server, which the 2017 ClusPro protocol names as
+#              the way to identify CDRs for its own masking example
+#              (Nat Protoc 12(2):255-278, published p.261, Step 8E(ii):
+#              "To find CDRs... The resulting page provides three different
+#              annotations of CDR regions (Chothia, ABM, and Kabat)").
+#   retrieved  2026-08-13
+#   sha256     448c579c89703ac30d1f92a4800140959cdc7062370696f18e2fe31f5b077392
+#              (of the fetched HTML; the table below is transcribed from its
+#              "CDR Definitions" section)
+#   checked    Every row transcribed against the rendered table. The three
+#              columns (kabat, abm, chothia) are the three
+#              annotations the protocol says abYsis returns. The source table
+#              also includes the contact and IMGT definitions.
+#   status     [MEASURED] as a transcription. The ranges are in KABAT
+#              NUMBERING (except where a row says otherwise), which is NOT the
+#              numbering most PDB entries use -- see the warning below.
+#
+# WHY THERE ARE TWO H1 ROWS
+#   The page gives CDR-H1 twice because the Kabat definition's end position is
+#   spelled differently in the two numbering schemes: H35B under Kabat
+#   numbering (which puts H1 insertions at 35A/35B) and H35 under
+#   Chothia/Martin numbering (which puts them structurally). They denote the
+#   same residues. `scheme` says which numbering each row is written in.
+#
+# THE WARNING, WHICH IS THE WHOLE REASON THIS FILE IS NOT ENOUGH ON ITS OWN
+#   These ranges can only be applied to a chain that is *already* numbered in
+#   the scheme named. Most deposited Fabs are not: 1FGN, the entry the ClusPro
+#   protocol's own masking example uses, numbers both chains 1-214 sequentially
+#   with no insertion codes at all. Indexing it with "L24-L34" happens to be
+#   right and "H95-H102" is wrong by four residues, and nothing about the
+#   arithmetic says which. `scripts/cdr.jl` therefore locates the loops by the
+#   same page's conserved sequence anchors and ASSERTS each one, and uses this
+#   table only for the part that is scheme-independent: which definitions exist
+#   and hence what their union is.
+#
+# THE UNION, WHICH IS WHAT THE ANNOTATOR ACTUALLY NEEDS
+#   The protocol masked "residues that were not considered to be in a CDR by
+#   any of these annotations" (published p.273), i.e. it PRESERVED the union of
+#   Kabat, AbM and Chothia. Reading the table down: Chothia is contained in AbM
+#   for every loop and AbM is contained in Kabat for H2 while Kabat is
+#   contained in AbM for H1, so
+#
+#       union = Kabat u AbM = L24-L34, L50-L56, L89-L97,
+#                             H26-H35B, H50-H65, H95-H102
+#
+#   which is the `union` row below. It is DERIVED from the five transcribed
+#   rows, not transcribed, and is marked so.
+loop	scheme	kabat	abm	chothia	contact	imgt
+L1	kabat	L24-L34	L24-L34	L26-L32	L30-L36	L27-L32
+L2	kabat	L50-L56	L50-L56	L50-L52	L46-L55	L50-L51
+L3	kabat	L89-L97	L89-L97	L91-L96	L89-L96	L89-L97
+H1	kabat	H31-H35B	H26-H35B	H26-H32..34	H30-H35B	H26-H35B
+H1	chothia_martin	H31-H35	H26-H35	H26-H32	H30-H35	H26-H33
+H2	kabat	H50-H65	H50-H58	H52-H56	H47-H58	H51-H56
+H3	kabat	H95-H102	H95-H102	H96-H101	H93-H101	H93-H102
+# derived rows -- the union of {kabat, abm, chothia}, per loop, kabat numbering
+union	kabat	L24-L34	-	-	-	-
+union	kabat	L50-L56	-	-	-	-
+union	kabat	L89-L97	-	-	-	-
+union	kabat	H26-H35B	-	-	-	-
+union	kabat	H50-H65	-	-	-	-
+union	kabat	H95-H102	-	-	-	-

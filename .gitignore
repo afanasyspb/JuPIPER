@@ -1,0 +1,37 @@
+# Environments resolved on the local machine
+/gpu/Manifest.toml
+LocalPreferences.toml
+
+# Structures are fetched from the RCSB PDB by scripts/fetch_structures.sh and
+# verified against data/structures.sha256; the files themselves are not tracked.
+/data/structures/*.pdb
+
+# Run outputs
+/results/*
+!/results/wp8/
+/results/wp8/*
+!/results/wp8/comparison_summary.csv
+!/results/wp8/1ACB/
+!/results/wp8/1AVX/
+!/results/wp8/1AY7/
+!/results/wp8/1BVN/
+!/results/wp8/1CGI/
+/results/wp8/*/*
+!/results/wp8/*/comparison.json
+!/results/wp8/*/server/
+/results/wp8/*/server/*
+!/results/wp8/*/server/manifest.tsv
+
+/reproducibility/build/
+__pycache__/
+
+*.wisdom
+*.log
+
+# Editors and OS
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store
+Thumbs.db

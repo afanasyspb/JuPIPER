@@ -1,0 +1,334 @@
+\documentclass[10pt,twocolumn]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[a4paper,top=22mm,bottom=24mm,left=18mm,right=18mm,columnsep=6mm]{geometry}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{microtype}
+\usepackage[hidelinks]{hyperref}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{natbib}
+\bibpunct{(}{)}{;}{a}{}{,}
+
+\definecolor{jpteal}{HTML}{0E8F9E}
+\titleformat{\section}{\normalfont\large\bfseries}{\thesection}{0.6em}{}
+\titleformat{\subsection}{\normalfont\normalsize\bfseries}{\thesubsection}{0.6em}{}
+\titlespacing*{\section}{0pt}{1.4ex plus .3ex}{0.7ex}
+\titlespacing*{\subsection}{0pt}{1.1ex plus .2ex}{0.5ex}
+\setlength{\parskip}{0pt}
+\setlength{\parindent}{1.2em}
+\raggedbottom
+\clubpenalty=10000
+\widowpenalty=10000
+\pagestyle{fancy}\fancyhf{}
+\renewcommand{\headrulewidth}{0.4pt}
+\lhead{\small\textit{JuPIPER}}
+\rhead{\small\thepage\ of \pageref{LastPage}}
+
+\newcommand{\code}[1]{\texttt{\small #1}}
+
+% Every campaign and real-complex figure below is a macro computed from the
+% committed result files by make_numbers.py. Regenerate after new data; do not
+% type a number from either file into the prose.
+\graphicspath{{build/}}
+\input{numbers}
+
+\begin{document}
+
+\twocolumn[
+\begin{@twocolumnfalse}
+\vspace*{-6mm}
+\noindent{\small\bfseries\color{jpteal} Structural bioinformatics \quad Application Note\par}
+
+\vspace{1mm}
+\noindent{\LARGE\bfseries JuPIPER: editable scoring for FFT-based protein--protein docking on CPUs and GPUs\par}
+
+\vspace{2.5mm}
+\noindent{\normalsize Ilya Afanasyev$^{1,*}$\par}
+
+\vspace{1.5mm}
+\noindent{\footnotesize $^{1}$Innopolis University, Innopolis, Russia.
+$^{*}$To whom correspondence should be addressed.
+E-mail: \href{mailto:i.afanasyev@innopolis.ru}{i.afanasyev@innopolis.ru}%
+\par}
+
+\vspace{3mm}
+\hrule
+\vspace{2.5mm}
+
+\noindent{\small\textbf{Abstract}\par}
+
+\vspace{1mm}
+\noindent\textbf{Summary}\quad
+JuPIPER implements the published PIPER rigid-body docking search in Julia,
+allowing researchers to change how shape and atomic contacts are scored
+during the search on a CPU or an NVIDIA GPU. In bound redocking on one
+RTX~4090, orientation searches for \campOk{} completed enzyme--inhibitor
+cases from Docking Benchmark~4.0 took \campMinutes{} minutes in total, and in \campRankOne{} cases the lowest-energy placement was within
+10\,\AA{} ligand C$\alpha$ RMSD of the deposited placement.
+
+\smallskip
+\noindent\textbf{Availability and Implementation}\quad
+JuPIPER is implemented in Julia and distributed under the MIT licence.
+The project repository is
+\url{https://github.com/afanasyspb/JuPIPER}. The tagged software release
+and its benchmark records are intended for archiving on Zenodo.
+% Zenodo version DOI (after archiving):
+
+\smallskip
+\noindent\textbf{Contact}\quad
+\href{mailto:i.afanasyev@innopolis.ru}{i.afanasyev@innopolis.ru}
+
+\smallskip
+\noindent\textbf{Supplementary Information}\quad
+The supplement gives the correlation formula, CPU and GPU measurements,
+a Hopf-fibre pruning test and results for all \campCases{} benchmark cases.
+\vspace{2.5mm}\hrule\vspace{4mm}
+\end{@twocolumnfalse}
+]
+
+\section{Introduction}
+Protein--protein docking generates candidate structures of a complex
+from structures of its two partners. The scoring function determines
+which placements survive the initial search: a model discarded at this
+stage is unavailable for later rescoring. Fast Fourier transforms (FFTs)
+can score geometric fit at all translations for a given ligand orientation
+(Katchalski-Katzir \textit{et al.}, 1992). PIPER adds interaction terms
+(Kozakov \textit{et al.}, 2006) and underlies the ClusPro docking server
+(Kozakov \textit{et al.}, 2017). JuPIPER implements this search in Julia
+(Bezanson \textit{et al.}, 2017) for CPUs and NVIDIA GPUs. Method developers
+can modify the physics-based FFT search or integrate it into a hybrid
+pipeline without rewriting C or CUDA code.
+
+For a structural biologist choosing interfaces to test, each pose predicts
+which surfaces meet. Even at a fixed ligand orientation, changing the contact
+weight can favour a different receptor face. JuPIPER exposes the weights,
+intermediate fields and pose transformations behind that choice.
+
+\section{Implementation}
+The user supplies two structures and selects the receptor and ligand chains.
+BioStructures reads the PDB coordinates. JuPIPER assigns atoms to 18 types, builds
+the receptor fields and computes their Fourier transforms once. For each ligand
+orientation on a Hopf grid (Yershova \textit{et al.}, 2010), the program rotates
+the ligand, deposits its atoms on grids and evaluates all translations together
+(Fig.~\ref{fig:campaign}a). The benchmark samples \campNrot{} orientations
+at a translational grid spacing of 1.2\,\AA. Each orientation contributes
+one pose, the translation with the lowest energy. Its rotation and translation
+recover the ligand coordinates in the receptor frame.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=.96\textwidth]{fig1_pipeline.pdf}\par
+\textbf{(a)}\par\smallskip
+\includegraphics[width=.50\textwidth]{fig5_campaign_compact.pdf}\par
+\textbf{(b)}\par
+\caption{\textbf{(a)} The search reuses receptor fields across orientations
+and retains the lowest-energy translation for each. Poses are
+then ranked by energy and clustered by structural similarity.
+\textbf{(b)} Bound-redocking recovery counts cases with at least one hit among
+the $K$ lowest-energy poses. A hit has ligand C$\alpha$ RMSD $\leq 10$\,\AA{}
+from the deposited placement with the receptor fixed. Recovery increases with
+rank cut-off; the curves from the two hosts coincide.}
+\label{fig:campaign}
+\end{figure*}
+
+The score combines shape, electrostatics and a contact potential. The benchmark
+uses five components of the $18\times18$ DARS contact potential
+(Chuang \textit{et al.}, 2008), giving seven fields in total. The shape
+weight ($w_1=7$) sets the energy cost of placing ligand atoms in the receptor
+core. The benchmark assigns zero atomic charges, so the electrostatic term
+contributes zero even with $w_2=1500$. The contact weight ($w_3=2.5$)
+scales the contribution of atom-type-specific contacts.
+
+Clustering groups the 1,000 lowest-energy poses by pairwise ligand heavy-atom
+root-mean-square deviation (RMSD), whereas benchmark recovery requires ligand
+C$\alpha$ RMSD $\leq 10$\,\AA{} from the deposited pose, with the receptor fixed. Greedy
+clustering with a 10\,\AA{} radius yields up to 30 centres, ranked by
+the number of poses each represents. An energy rank therefore identifies
+an individual placement, while a population rank identifies a family of
+similar placements.
+
+\subsection{Changing the contact weight}
+From the repository root, start \texttt{julia -{}-project=test}.
+This CPU example docks one chain from each PDB file on a small Hopf grid.
+Replace the filenames and chain identifiers with those of your input structures.
+Setting $w_3=3.0$ increases the benchmark contact weight by 20\% when
+selecting the best translation for each orientation.
+\begin{lstlisting}[basicstyle=\footnotesize\ttfamily,columns=fullflexible,
+  keepspaces=true,showstringspaces=false,aboveskip=7pt,belowskip=7pt,
+  frame=single,framerule=.3pt,framesep=3pt,xleftmargin=4pt,xrightmargin=4pt,
+  rulecolor=\color{black!35},backgroundcolor=\color{black!3}]
+using BioStructures, JuPIPER
+include("examples/docking.jl")
+rec = read_atoms("receptor.pdb"; chains="A")
+lig = read_atoms("ligand.pdb"; chains="A")
+rots = rotations_hopf_balanced(72)
+poses, grid = search_poses(rec, lig, rots; w3=3.0)
+best = argmin(p -> p.energy, poses)
+R, t = pose_transform(best, rots, grid)
+write_complex("best.pdb", rec, lig, R, t)
+\end{lstlisting}
+The output contains the receptor (chain R) and the lowest-energy ligand
+placement (chain L) in the input receptor's coordinate frame. To examine
+the effect of the weight alone, repeat the search on the same grid with
+\code{w3=2.5} and superpose the two models on chain R.
+
+On CPUs the correlation function uses FFTW (Frigo and Johnson, 2005).
+On NVIDIA GPUs the same function calls cuFFT via CUDA.jl (Besard \textit{et al.}, 2019).
+As in the Cartesian search described by Padhorny \textit{et al.}\ (2016),
+weighted products are summed in Fourier space before a single inverse FFT.
+The search reuses workspaces across ligand orientations.
+Specialised routines handle accumulation and selection of the minimum.
+Supplementary Figs.~S1(b) and S2 show device dispatch and the time spent
+at each stage.
+
+\section{Results}
+\subsection{Effect of the shape weight}
+For the bound E2A--HPr complex (1GGR), the published shape weight of 2.1 used
+with standard van der Waals radii favoured placements inside the receptor.
+A scan located the transition to repulsion at 3.151, close to the geometric
+prediction of 3.264. The original PIPER description uses modified radii. With
+standard radii and $w_1=7$, the lowest-energy placement had ligand C$\alpha$ RMSD
+\dockRmsd\,\AA{} to the deposited ligand, measured with the receptor fixed.
+The closest sampled pose reached \dockBest\,\AA{} at energy rank \dockBestRank.
+On one RTX~4090, the \dockNrot{}-orientation search took \dockGpuFThirtyTwo\,s
+in single precision. The full set of poses allows the effect of a rank cut-off
+to be examined separately from the geometric resolution of the search.
+
+\subsection{Bound redocking across the benchmark}
+We used the enzyme--inhibitor cases of Docking Benchmark 4.0
+(Hwang \textit{et al.}, 2010). Both partners were taken from their deposited
+bound complex. The \campCases{} benchmark
+cases represent 51 distinct structures because two use different chains of
+1OYV. The control complex 1GGR was analysed separately.
+
+Of the \campCases{} cases, \campOk{} completed. Atom typing failed for nine
+atoms of a GLX residue in 4CPA. Among the completed cases, the lowest-energy
+pose was a hit in \campRankOne{}/\campOk{} and the 1,000 lowest-energy poses
+contained a hit in \campHitTopK{}/\campOk{} (Fig.~\ref{fig:campaign}b).
+The centre of the most populated cluster was a hit in \campClusterOne{}/\campOk{}.
+At the full depth of \campNrot{} poses, \campHitAll{}/\campOk{} had a hit.
+The search for 1D6R completed without a hit and contributes to every denominator.
+Across cases with a hit, the first-hit rank ranged from 1 to \campMaxHitRank{}.
+
+Orientation searches for these cases took \campMinutes{} minutes in total on
+one RTX~4090 in single precision (\campPerCaseLo--\campPerCaseHi\,s per case).
+The timer excludes PDB input, field preparation, pose evaluation and clustering.
+A repeat on another host with an RTX~4090 took \campTwoMinutes{} minutes.
+First-hit rank, top-1,000 hit count and near-native cluster rank agreed for
+\campEqualRanks{}/\campOk{} cases. The recorded lowest energies were identical
+for \campEqualEnergy{}/\campOk{}.
+
+\subsection{Comparison with ClusPro}
+We submitted the first five targets in a predetermined case order to ClusPro.
+The series size was fixed after the first comparison had been inspected.
+The primary comparison required agreement on the population rank of the first
+near-native cluster and a distance within the estimated joint discretisation
+floor (1.6\,\AA{}). We measured the latter from the leading balanced ClusPro
+model to the nearest JuPIPER cluster centre. The joint criterion was met in
+\wpJoint{}/\wpCases{} cases. Both programs placed a near-native cluster first
+in \wpSameBand{}/\wpCases{}. The nearest centre was as far as
+\wpCentreAllHi\,\AA{} from the leading server model.
+
+Among the 1,000 lowest-energy poses, \wpNearN{} of \wpCases{} searches
+retained a pose within 2\,\AA{} of ClusPro's top-ranked balanced model
+(Table~\ref{tab:wp8}). Those poses were \wpNearLo--\wpNearHi\,\AA{} away
+at energy ranks \wpRankLo--\wpRankHi{}. For \wpOddCase{} the closest pose
+was \wpOddNear\,\AA{} away. A user inspecting only the leading cluster
+would miss this agreement at the level of individual poses.
+
+\begin{table}[!ht]
+\centering
+\caption{Near-native centres are ranked by population (dash: none).
+Ligand C$\alpha$ RMSD (\AA) to ClusPro's leading balanced model after
+receptor alignment identifies the nearest JuPIPER centre (population rank)
+and pose (energy rank). Individual poses more closely match the server model.}\label{tab:wp8}
+\vspace{6pt}
+\small\setlength{\tabcolsep}{2.7pt}
+\begin{tabular}{@{}lrrrrrr@{}}\toprule
+&\multicolumn{2}{c}{Near-native rank}&\multicolumn{2}{c}{Nearest centre}&\multicolumn{2}{c}{Nearest pose}\\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(l){6-7}
+Case & ClusPro & JuPIPER & RMSD & Rank & RMSD & Rank\\\midrule
+\wpTableBody
+\bottomrule\end{tabular}
+\end{table}
+
+\section{Discussion}
+Experimental evidence about contacting residues can guide the search in two
+ways. Distance restraints exclude translations that separate specified sites
+too far; an orientation can be skipped if none remain. Testing feasibility
+still costs time. A residue mask instead modifies the receptor field to penalise
+contacts outside a suspected interface, without changing the grid or rotation count.
+
+In the unbound E2A--HPr test (1F3G and 1POH), requiring all 20 restraint groups to be satisfied
+ruled out every translation for 78.06\% of orientations. Across the tested
+cutoffs, restrained searches still took 1.26--1.86 times as long as the
+unrestrained search. The near-native cluster grew from 34 to 435 poses and
+rose from fifth to second by population, with interface RMSD remaining
+within 2.37--2.50\,\AA{}. In a separate unbound test (1FGN and 1TFH),
+doubling repulsion outside the antibody binding loops moved the centre
+closest by interface RMSD from rank 17 to 15. Only in the E2A--HPr example
+did the observed interface move into the two largest clusters. Neither
+intervention sped up the search.
+
+Bound redocking tests recovery from bound conformations, not predictive
+performance across unbound targets. The five ClusPro comparisons do not
+separate the effects of scoring, clustering and refinement. A matched runtime
+comparison with PIPER remains open.
+
+\section*{Data availability}
+The benchmark case list, machine-tagged results, comparison JSON files and
+figure generators accompany the source. The comparison tables can be regenerated
+from the JSON files. Recomputing distances from coordinates also requires the
+ClusPro model files. The repository records their checksums and job identifiers.
+The service's two-month retention window for these submissions ended in November 2026.
+
+\section*{Conflict of interest}
+None declared.
+
+\begin{thebibliography}{}
+\small\setlength{\itemsep}{1.5pt}
+\item Besard T, Foket C, De Sutter B. Effective extensible programming:
+unleashing Julia on GPUs. \textit{IEEE Trans Parallel Distrib Syst}
+2019; \textbf{30}: 827--41.
+
+\item Bezanson J, Edelman A, Karpinski S \textit{et al.} Julia: a fresh approach
+to numerical computing. \textit{SIAM Rev} 2017; \textbf{59}: 65--98.
+
+\item Chuang G-Y, Kozakov D, Brenke R \textit{et al.} DARS (Decoys As the
+Reference State) potentials for protein--protein docking. \textit{Biophys J}
+2008; \textbf{95}: 4217--27.
+
+\item Frigo M, Johnson SG. The design and implementation of FFTW3.
+\textit{Proc IEEE} 2005; \textbf{93}: 216--31.
+
+\item Hwang H, Vreven T, Janin J \textit{et al.} Protein--protein docking
+benchmark version 4.0. \textit{Proteins} 2010; \textbf{78}: 3111--4.
+
+\item Katchalski-Katzir E, Shariv I, Eisenstein M \textit{et al.} Molecular
+surface recognition: determination of geometric fit between proteins and their
+ligands by correlation techniques. \textit{Proc Natl Acad Sci USA}
+1992; \textbf{89}: 2195--9.
+
+\item Kozakov D, Brenke R, Comeau SR \textit{et al.} PIPER: an FFT-based protein
+docking program with pairwise potentials. \textit{Proteins} 2006; \textbf{65}:
+392--406.
+
+\item Kozakov D, Hall DR, Xia B \textit{et al.} The ClusPro web server for
+protein--protein docking. \textit{Nat Protoc} 2017; \textbf{12}: 255--78.
+
+\item Padhorny D, Kazennov A, Zerbe BS \textit{et al.} Protein--protein docking
+by fast generalized Fourier transforms on 5D rotational manifolds.
+\textit{Proc Natl Acad Sci USA} 2016; \textbf{113}: E4286--93.
+
+\item Yershova A, Jain S, LaValle SM \textit{et al.} Generating uniform
+incremental grids on SO(3) using the Hopf fibration. \textit{Int J Robot Res}
+2010; \textbf{29}: 801--12.
+\end{thebibliography}
+\end{document}

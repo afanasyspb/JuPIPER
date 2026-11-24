@@ -1,0 +1,50 @@
+{
+  "_provenance": {
+    "what": "The 20 ambiguous interaction restraints (AIRs) that the 2017 ClusPro protocol uses for its own worked E2A-HPr example. NOT the 20 NOE distances themselves: the NOE measurements are Wang et al., EMBO J 19:5635-5649 (2000), which this repository does not hold, and the AIRs derived from them are Dominguez, Boelens & Bonvin, JACS 125:1731-1737 (2003) [ja026939x] supplementary file S2.",
+    "cited_by": "Kozakov, Hall, Xia, Porter, Padhorny, Yueh, Beglov & Vajda, 'The ClusPro web server for protein-protein docking', Nature Protocols 12(2):255-278 (2017), published p.273 = PMC author manuscript p.21, 'Accounting for pairwise distance restraint'.",
+    "source_air": "https://cluspro.org/examples/ja026939x_s2.txt",
+    "source_air_sha256": "8258948857c363dca643912e681ccb051957994102b971f49aec72f45177cfde",
+    "source_json": "https://cluspro.org/examples/ja026939x_s2.json",
+    "source_json_sha256": "3146e53cf6ab94d141ecb63ccea6e27d67277197da3621800b81ad28eefd2402",
+    "retrieved": "2026-08-13",
+    "regenerated_by": "scripts/fetch_restraints.jl",
+    "checked": "Both files parsed independently and required to agree: 20 groups; 11 anchored on E2A and 9 on HPr; every receptor and ligand residue list identical group for group; one distance convention across the set; every ClusPro group carrying required=1; ClusPro restraint type 'residue'. The script refuses to write on any mismatch.",
+    "case": {
+      "receptor": {"pdb": "1F3G", "chain": "A", "molecule": "glucose-specific phosphocarrier protein IIAglc (E2A), unbound X-ray"},
+      "ligand": {"pdb": "1POH", "chain": "A", "molecule": "histidine-containing phosphocarrier protein HPr, unbound X-ray"},
+      "native": {"pdb": "1GGR", "rec_chain": "A", "lig_chain": "B"}
+    },
+    "distance_convention": {
+      "adopted": {"dmin": 0.0, "dmax": 4.5, "meaning": "minimum heavy-atom separation between the two residues", "source": "ClusPro JSON, type 'residue'"},
+      "air_original": {"dmin": 0.0, "dmax": 3.0, "meaning": "HADDOCK effective distance, <d^-6>^(-1/6) over all atom pairs", "source": "CNS assign statement '3.0 3.0 0.0'"},
+      "note": "The two are different quantities, not two roundings of one. JuPIPER's Restraint is a minimum-separation test, so the ClusPro reading is the one it can express; the AIR numbers are recorded so the substitution is visible."
+    },
+    "group_cutoff": {"value": 0, "meaning": "RestraintGroup cutoff, i.e. MORE THAN 0 members satisfied = at least one. This is the AIR semantics and matches every published group's required=1."},
+    "set_cutoff": {"value": null, "status": "[UNPUBLISHED]", "meaning": "How many of the 20 groups a translation must satisfy. The protocol (p.8) says 'the required number of restraint groups', and the published JSON carries no set-level field. Swept by scripts/validate_constraints.jl rather than guessed."},
+    "status": "[MEASURED] as a transcription of two fetched, mutually cross-checked files. The distance reading is [ASSUMED] (see distance_convention) and the set-level cutoff is [UNPUBLISHED]."
+  },
+  "receptor_residues": [38, 39, 40, 45, 46, 68, 69, 71, 72, 78, 80, 86, 94, 96, 141],
+  "ligand_residues": [12, 15, 16, 17, 20, 48, 51, 52, 54, 56],
+  "groups": [
+    {"rec_residues": [38], "lig_residues": [12, 15, 16, 17, 20, 48, 51, 52, 54, 56], "dmin": 0.0, "dmax": 4.5, "cutoff": 0},
+    {"rec_residues": [40], "lig_residues": [12, 15, 16, 17, 20, 48, 51, 52, 54, 56], "dmin": 0.0, "dmax": 4.5, "cutoff": 0},
+    {"rec_residues": [45], "lig_residues": [12, 15, 16, 17, 20, 48, 51, 52, 54, 56], "dmin": 0.0, "dmax": 4.5, "cutoff": 0},
+    {"rec_residues": [46], "lig_residues": [12, 15, 16, 17, 20, 48, 51, 52, 54, 56], "dmin": 0.0, "dmax": 4.5, "cutoff": 0},
+    {"rec_residues": [69], "lig_residues": [12, 15, 16, 17, 20, 48, 51, 52, 54, 56], "dmin": 0.0, "dmax": 4.5, "cutoff": 0},
+    {"rec_residues": [71], "lig_residues": [12, 15, 16, 17, 20, 48, 51, 52, 54, 56], "dmin": 0.0, "dmax": 4.5, "cutoff": 0},
+    {"rec_residues": [78], "lig_residues": [12, 15, 16, 17, 20, 48, 51, 52, 54, 56], "dmin": 0.0, "dmax": 4.5, "cutoff": 0},
+    {"rec_residues": [80], "lig_residues": [12, 15, 16, 17, 20, 48, 51, 52, 54, 56], "dmin": 0.0, "dmax": 4.5, "cutoff": 0},
+    {"rec_residues": [94], "lig_residues": [12, 15, 16, 17, 20, 48, 51, 52, 54, 56], "dmin": 0.0, "dmax": 4.5, "cutoff": 0},
+    {"rec_residues": [96], "lig_residues": [12, 15, 16, 17, 20, 48, 51, 52, 54, 56], "dmin": 0.0, "dmax": 4.5, "cutoff": 0},
+    {"rec_residues": [141], "lig_residues": [12, 15, 16, 17, 20, 48, 51, 52, 54, 56], "dmin": 0.0, "dmax": 4.5, "cutoff": 0},
+    {"rec_residues": [38, 39, 40, 45, 46, 68, 69, 71, 72, 78, 80, 86, 94, 96, 141], "lig_residues": [15], "dmin": 0.0, "dmax": 4.5, "cutoff": 0},
+    {"rec_residues": [38, 39, 40, 45, 46, 68, 69, 71, 72, 78, 80, 86, 94, 96, 141], "lig_residues": [16], "dmin": 0.0, "dmax": 4.5, "cutoff": 0},
+    {"rec_residues": [38, 39, 40, 45, 46, 68, 69, 71, 72, 78, 80, 86, 94, 96, 141], "lig_residues": [17], "dmin": 0.0, "dmax": 4.5, "cutoff": 0},
+    {"rec_residues": [38, 39, 40, 45, 46, 68, 69, 71, 72, 78, 80, 86, 94, 96, 141], "lig_residues": [20], "dmin": 0.0, "dmax": 4.5, "cutoff": 0},
+    {"rec_residues": [38, 39, 40, 45, 46, 68, 69, 71, 72, 78, 80, 86, 94, 96, 141], "lig_residues": [48], "dmin": 0.0, "dmax": 4.5, "cutoff": 0},
+    {"rec_residues": [38, 39, 40, 45, 46, 68, 69, 71, 72, 78, 80, 86, 94, 96, 141], "lig_residues": [51], "dmin": 0.0, "dmax": 4.5, "cutoff": 0},
+    {"rec_residues": [38, 39, 40, 45, 46, 68, 69, 71, 72, 78, 80, 86, 94, 96, 141], "lig_residues": [52], "dmin": 0.0, "dmax": 4.5, "cutoff": 0},
+    {"rec_residues": [38, 39, 40, 45, 46, 68, 69, 71, 72, 78, 80, 86, 94, 96, 141], "lig_residues": [54], "dmin": 0.0, "dmax": 4.5, "cutoff": 0},
+    {"rec_residues": [38, 39, 40, 45, 46, 68, 69, 71, 72, 78, 80, 86, 94, 96, 141], "lig_residues": [56], "dmin": 0.0, "dmax": 4.5, "cutoff": 0}
+  ]
+}
