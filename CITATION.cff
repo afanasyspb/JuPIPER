@@ -11,5 +11,11 @@ authors:
     given-names: Ilya
     affiliation: Innopolis University
     email: i.afanasyev@innopolis.ru
-# Zenodo version DOI: uncomment and fill in after the release is archived.
-# doi: "10.5281/zenodo.<record-id>"
+doi: "10.5281/zenodo.24503348"
+identifiers:
+  - type: doi
+    value: "10.5281/zenodo.24503348"
+    description: JuPIPER v0.1.0
+  - type: doi
+    value: "10.5281/zenodo.24503347"
+    description: JuPIPER (all versions)

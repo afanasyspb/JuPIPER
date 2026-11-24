@@ -1,5 +1,7 @@
 # JuPIPER
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.24503347.svg)](https://doi.org/10.5281/zenodo.24503347)
+
 A from-scratch Julia implementation of the mathematical core of
 [PIPER](https://doi.org/10.1002/prot.21117), the FFT-based rigid-body
 protein–protein docking algorithm (Kozakov, Brenke, Comeau & Vajda, *Proteins*
@@ -295,7 +297,7 @@ reported from measurements outside the archived JSON.
 ## Citation
 
 Ilya Afanasyev (2026). *JuPIPER*, version 0.1.0. See [CITATION.cff](CITATION.cff).
-<!-- Zenodo version DOI: insert the DOI for v0.1.0 here after archiving. -->
+Zenodo DOI for v0.1.0: [10.5281/zenodo.24503348](https://doi.org/10.5281/zenodo.24503348).
 
 ## License
 
